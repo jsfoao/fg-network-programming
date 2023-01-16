@@ -32,7 +32,7 @@ public class Sync_Transform : Synchronizable
 
     public override void AssembleData(Writer writer, byte LOD = 100)
     {
-        writer.Write(SynchronizedTransform.position);
+        writer.Write(SynchronizedPosition);
     }
 
     public override void DisassembleData(Reader reader, byte LOD = 100)
