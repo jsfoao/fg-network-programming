@@ -19,6 +19,8 @@ public class Sync_Transform : Synchronizable
     
     void Update()
     {
+        SynchronizedPosition = SynchronizedTransform.position;
+        
         if (SynchronizedPosition != _oldSynchronizedPosition)
         {
             _oldSynchronizedPosition = SynchronizedPosition;
