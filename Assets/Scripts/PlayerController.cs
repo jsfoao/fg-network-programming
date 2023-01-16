@@ -6,8 +6,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     public InputAction movementAction;
 
+    [SerializeField, Header("Multiplayer")]
+    private Alteruna.Avatar avatar;
+
     private Vector2 MoveDirection;
-    
+
     private void OnEnable()
     {
         movementAction.Enable();
@@ -20,7 +23,11 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        MoveDirection = movementAction.ReadValue<Vector2>();
+        if (avatar.IsMe)
+        {
+            MoveDirection = movementAction.ReadValue<Vector2>();
+        }
+        
     }
     private void FixedUpdate()
     {
