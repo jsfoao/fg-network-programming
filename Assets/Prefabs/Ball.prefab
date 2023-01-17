@@ -14,9 +14,11 @@ GameObject:
   - component: {fileID: 4792437325036264067}
   - component: {fileID: 4792437325036264066}
   - component: {fileID: 4792437325036264069}
+  - component: {fileID: 1432293144}
+  - component: {fileID: 1432293151}
   m_Layer: 0
   m_Name: Ball
-  m_TagString: Untagged
+  m_TagString: BallSpawner
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -93,7 +95,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4792437325036264068}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: a822c4acdd18eb84aba568cde277437c, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -162,3 +164,33 @@ MonoBehaviour:
     LastUpdated: 0
     NeverString: Never
     RealtimeString: Realtime
+--- !u!54 &1432293144
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4792437325036264068}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &1432293151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4792437325036264068}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52831a331d9870a4b9add01f15a15a60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 300
+  rb: {fileID: 1432293144}
