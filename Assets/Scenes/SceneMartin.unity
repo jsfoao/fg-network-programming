@@ -480,6 +480,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ball
       objectReference: {fileID: 0}
+    - target: {fileID: 4792437325036264068, guid: c61ddb1bed9a6b344b5dc6b8b049fae8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4792437325036264126, guid: c61ddb1bed9a6b344b5dc6b8b049fae8, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -743,6 +747,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1370002310173902367, guid: 029a9c0bb778b2b42b3c20a89108ea9f, type: 3}
+      propertyPath: SpawnableObjects.Array.data[0]
+      value: 
+      objectReference: {fileID: 4792437325036264068, guid: 3d2ab8bf9a5f9cc47af896c2e98e02d8, type: 3}
     - target: {fileID: 1370002310173902368, guid: 029a9c0bb778b2b42b3c20a89108ea9f, type: 3}
       propertyPath: m_Name
       value: Spawner
