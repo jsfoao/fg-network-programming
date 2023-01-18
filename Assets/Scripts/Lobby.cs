@@ -10,17 +10,8 @@ public class Lobby : MonoBehaviour
 {
     public static Lobby Instance;
 
-    [SerializeField]
-    public LobbyPlayer LobbyPlayerPrefab;
-
     [NonSerialized]
     public Multiplayer Multiplayer;
-
-    [NonSerialized]
-    public LobbyPlayer Local;
-    
-    [NonSerialized]
-    public List<LobbyPlayer> LobbyPlayers;
 
     [NonSerialized]
     public Spawner Spawner;
