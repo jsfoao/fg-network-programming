@@ -100,7 +100,7 @@ public class LobbyMenu : MonoBehaviour
     {
         GameObject buttonGo = _playerPanels[id].transform.Find("Button").gameObject;
         buttonGo.GetComponent<Button>().onClick.RemoveAllListeners();
-        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { Lobby.Instance.SetPlayerUser(id); });
+        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { Lobby.Instance.SetPlayerUser(id, Lobby.Instance.Multiplayer.Me); });
        
         Text playerText = _playerPanels[id].transform.Find("Title").GetComponent<Text>();
         playerText.text = $"P{id + 1}";
