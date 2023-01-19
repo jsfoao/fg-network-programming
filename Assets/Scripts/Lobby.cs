@@ -2,6 +2,7 @@ using Alteruna;
 using Alteruna.Trinity;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -16,18 +17,20 @@ public class Lobby : MonoBehaviour
     [NonSerialized]
     public Spawner Spawner;
 
-    [NonSerialized]
-    public bool InLobby = false;
-
-    // new
     [SerializeField]
-    public NetworkPlayer LocalPlayer;
+    List<Alteruna.Avatar> Avatars;
 
     [SerializeField]
-    public List<NetworkPlayer> Players;
+    public User[] PlayerUsers;
 
-    public UnityEvent<NetworkPlayer> OnJoin;
-    public UnityEvent<NetworkPlayer> OnLeave;
+    [SerializeField]
+    public bool IsPossessing = false;
+
+    [SerializeField]
+    public ushort PlayerID;
+
+    public UnityEvent<ushort, User> OnPlayerUserPossess;
+    public UnityEvent<ushort, User> OnPlayerUserUnpossess;
 
     void Awake()
     {
@@ -36,153 +39,44 @@ public class Lobby : MonoBehaviour
         else
             Destroy(this);
 
-        Players = new List<NetworkPlayer>();
-        
+        PlayerUsers = new User[4];
+
         Multiplayer = GetComponent<Multiplayer>();
         Spawner = GetComponent<Spawner>();
 
         Multiplayer.Connected.AddListener(Connected);
         Multiplayer.Disconnected.AddListener(Disconnected);
+
         Multiplayer.RoomJoined.AddListener(Join);
         Multiplayer.RoomLeft.AddListener(Leave);
+        Multiplayer.OtherUserJoined.AddListener(OtherJoin);
+        Multiplayer.OtherUserLeft.AddListener(OtherLeave);
 
         Multiplayer.RegisterRemoteProcedure("Internal_Message", Internal_Message);
-        Multiplayer.RegisterRemoteProcedure("Internal_Join", Internal_Join);
-        Multiplayer.RegisterRemoteProcedure("Internal_Leave", Internal_Leave);
+        Multiplayer.RegisterRemoteProcedure("Internal_SetPlayerUser", Internal_SetPlayerUser);
+        Multiplayer.RegisterRemoteProcedure("Internal_RemovePlayerUser", Internal_RemovePlayerUser);
     }
-
-    //public LobbyPlayer Join()
-    //{
-    //    if (InLobby) 
-    //    {
-    //        Debug.LogWarning("Can't join! LobbyPlayer already in lobby");
-    //        return null;
-    //    }
-    //    InLobby = true;
-    //    GameObject gameObject = Spawner.Spawn(0);
-    //    LobbyPlayer lobbyPlayer = gameObject.GetComponent<LobbyPlayer>();
-    //    lobbyPlayer.Init(GenID, "Player " + GenID);
-    //    LobbyPlayers.Add(lobbyPlayer);
-    //    GenID++;
-
-    //    Local = lobbyPlayer;
-
-    //    ProcedureParameters parameters = new ProcedureParameters();
-    //    parameters.Set("ID", lobbyPlayer.ID);
-
-    //    MessageLocal(lobbyPlayer.Name + " joined");
-
-    //    Multiplayer.InvokeRemoteProcedure("Internal_ConnectPlayer", UserId.All, parameters);
-    //    OnConnected.Invoke(Multiplayer.Me, lobbyPlayer);
-    //    return lobbyPlayer;
-    //}
-
-    //private void Internal_Join(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
-    //{
-    //    ushort id = parameters.Get("ID", (ushort)0);
-    //    GameObject gameObject = Spawner.Spawn(0);
-    //    LobbyPlayer lobbyPlayer = gameObject.GetComponent<LobbyPlayer>();
-    //    lobbyPlayer.Init(id, "Player " + id);
-    //    LobbyPlayers.Add(lobbyPlayer);
-    //    MessageLocal(lobbyPlayer.Name + " joined");
-    //    //OnConnected.Invoke(Multiplayer.GetUser(fromUser), lobbyPlayer);
-    //}
-
-    //public void Leave()
-    //{
-    //    if (!InLobby)
-    //    {
-    //        Debug.LogWarning("Can't leave! LobbyPlayer not in a lobby");
-    //        return;
-    //    }
-    //    InLobby = false;
-
-    //    Spawner.Despawn(Local.gameObject);
-    //    LobbyPlayers.Clear();
-    //    ProcedureParameters parameters = new ProcedureParameters();
-    //    parameters.Set("ID", Local.ID);
-
-    //    MessageLocal(Local.Name + " left");
-
-    //    Multiplayer.InvokeRemoteProcedure("Internal_DisconnectPlayer", UserId.All, parameters);
-    //    OnDisconnected.Invoke(Multiplayer.Me, Local);
-    //    Local = null;
-    //}
-
-    //private void Internal_Leave(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
-    //{
-    //    ushort id = parameters.Get("ID", (ushort)0);
-    //    LobbyPlayer leaving = null;
-    //    foreach (LobbyPlayer player in LobbyPlayers)
-    //    {
-    //        if (id == player.ID)
-    //        {
-    //            leaving = player;
-    //            LobbyPlayers.Remove(player);
-    //            MessageLocal(leaving.Name + " left");
-    //            OnDisconnected.Invoke(Multiplayer.GetUser(fromUser), leaving);
-    //            return;
-    //        }
-    //    }
-    //}
 
     public void Join(Multiplayer multiplayer, Room room, User user)
-    {
-        LocalPlayer.User = user;
-        Players.Add(LocalPlayer);
-        ProcedureParameters parameters = new ProcedureParameters();
-        parameters.Set("name", LocalPlayer.Name);
-        parameters.Set("userId", LocalPlayer.User.Index);
-
-        Multiplayer.InvokeRemoteProcedure("Internal_Join", UserId.All, parameters);
-        OnJoin.Invoke(LocalPlayer);
-        MessageLocal($"{LocalPlayer.Name} joined!");
+    {   
+        MessageLocal($"You joined!");
     }
 
-    private void Internal_Join(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
+    public void OtherJoin(Multiplayer multiplayer, User user)
     {
-        string name = parameters.Get("name", "player");
-        ushort id = parameters.Get("userId", (ushort)0);
-      
-        NetworkPlayer player = new NetworkPlayer();
-        player.User = Multiplayer.GetUser(id);
-        player.Name = name;
-        
-        Players.Add(player);
-        OnJoin.Invoke(player);
-        MessageLocal($"{LocalPlayer.Name} joined!");
+        MessageLocal($"{user.Name} joined!");
     }
 
     public void Leave(Multiplayer multiplayer)
     {
-        ProcedureParameters parameters = new ProcedureParameters();
-        parameters.Set("name", LocalPlayer.Name);
-        parameters.Set("userId", LocalPlayer.User.Index);
-
-        Players.Clear();
-        OnLeave.Invoke(LocalPlayer);
-        MessageLocal($"{LocalPlayer.Name} left!");
+        MessageLocal($"You left!");
     }
 
-    private void Internal_Leave(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
+    public void OtherLeave(Multiplayer multiplayer, User user)
     {
-        string name = parameters.Get("name", "player");
-        ushort id = parameters.Get("userId", (ushort)0);
-        
-        NetworkPlayer player = new NetworkPlayer();
-        player.User = Multiplayer.GetUser(id);
-        player.Name = name;
-
-        foreach (var pl in Players)
-        {
-            if (player.User.Index == pl.User.Index)
-            {
-                Players.Remove(pl);
-                MessageLocal($"{player.Name} left!");
-                return;
-            }
-        }
+        MessageLocal($"{user.Name} left!");
     }
+
     public void Message(string message, bool prefix = true)
     {
         string msg = "";
@@ -223,22 +117,78 @@ public class Lobby : MonoBehaviour
     // Events
     private void Connected(Multiplayer multiplayer, Endpoint endpoint)
     {
-        Message("Connected to server");
-        LocalPlayer = new NetworkPlayer();
-        LocalPlayer.Name = "Player";
-
-        Debug.Log($"Created new player: {LocalPlayer.Name}");
+        MessageLocal("Connected to server");
     }
 
     private void Disconnected(Multiplayer multiplayer, Endpoint endpoint) 
     {
-        Message("Disconnected from server");
+        MessageLocal("Disconnected from server");
     }
-}
 
-[Serializable]
-public class NetworkPlayer
-{
-    public string Name;
-    public User User;
+    public void SetPlayerUser(ushort id)
+    {
+        if (IsPossessing)
+        {
+            foreach (User user in PlayerUsers)
+            {
+                if (user == null)
+                {
+                    continue;
+                }
+                if (Multiplayer.Me.Index == user.Index)
+                {
+                    RemovePlayerUser(PlayerID);
+                    break;
+                }
+            }
+        }
+
+        IsPossessing = true;
+        PlayerID = id;
+
+        PlayerUsers[id] = Multiplayer.Me;
+        MessageLocal($"{Multiplayer.Me.Name} possessed P{id+1}!");
+        OnPlayerUserPossess.Invoke(id, Multiplayer.Me);
+
+        ProcedureParameters parameters = new ProcedureParameters();
+        parameters.Set("id", id);
+        parameters.Set("userId", Multiplayer.Me.Index);
+        Multiplayer.InvokeRemoteProcedure("Internal_SetPlayerUser", UserId.All, parameters);
+    }
+
+    private void Internal_SetPlayerUser(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
+    {
+        ushort id = parameters.Get("id", (ushort)0);
+        ushort userId = parameters.Get("userId", (ushort)0);
+
+        User user = Multiplayer.GetUser(userId);
+        PlayerUsers[id] = user;
+        MessageLocal($"{user.Name} possessed P{id + 1}!");
+        OnPlayerUserPossess.Invoke(id, user);
+    }
+
+    public void RemovePlayerUser(ushort id)
+    {
+        IsPossessing = false;
+        PlayerUsers[id] = null;
+
+        MessageLocal($"{Multiplayer.Me.Name} unpossessed P{id + 1}!");
+        OnPlayerUserUnpossess.Invoke(id, Multiplayer.Me);
+
+        ProcedureParameters parameters = new ProcedureParameters();
+        parameters.Set("id", id);
+        parameters.Set("userId", Multiplayer.Me.Index);
+        Multiplayer.InvokeRemoteProcedure("Internal_RemovePlayerUser", UserId.All, parameters);
+    }
+
+    private void Internal_RemovePlayerUser(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
+    {
+        ushort id = parameters.Get("id", (ushort)0);
+        ushort userId = parameters.Get("userId", (ushort)0);
+        User user = Multiplayer.GetUser(userId);
+
+        PlayerUsers[id] = null;
+        MessageLocal($"{user.Name} unpossessed P{id + 1}!");
+        OnPlayerUserUnpossess.Invoke(id, user);
+    }
 }
