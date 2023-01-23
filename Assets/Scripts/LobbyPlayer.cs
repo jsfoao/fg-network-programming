@@ -14,6 +14,8 @@ public class LobbyPlayer : MonoBehaviour
     [SerializeField ]
     public User Owner;
 
+    public bool IsMe => Avatar.Possessor == Lobby.Instance.Local;
+
     private void Start()
     {
         Avatar = GetComponent<Alteruna.Avatar>();

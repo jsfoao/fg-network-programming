@@ -253,6 +253,7 @@ public class Lobby : MonoBehaviour
                 break;
             }
         }
+
         MessageLobby($"{user.Name} possessed player {playerId}");
         OnPossessedPlayer.Invoke(user, playerId);
     }
