@@ -38,7 +38,8 @@ public class LobbyMenu : MonoBehaviour
 
         for (ushort i = 0; i < _playerPanels.Count; i++)
         {
-            UnpossessPanel(null, i);
+            int playerId = i + 1;
+            UnpossessPanel(null, (ushort)playerId);
         }
     }
 
@@ -136,13 +137,12 @@ public class LobbyMenu : MonoBehaviour
 
     public void UnpossessPanel(User user, ushort id)
     {
-        GameObject buttonGo = _playerPanels[id].transform.Find("Button").gameObject;
+        GameObject buttonGo = _playerPanels[id - 1].transform.Find("Button").gameObject;
         buttonGo.GetComponent<Button>().onClick.RemoveAllListeners();
-        int playerId = id - 1;
-        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.PossessPlayer(Lobby.Instance.Local, (ushort)playerId); });
+        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.PossessPlayer(Lobby.Instance.Local, id); });
        
-        Text playerText = _playerPanels[id].transform.Find("Title").GetComponent<Text>();
-        playerText.text = $"P{id + 1}";
+        Text playerText = _playerPanels[id - 1].transform.Find("Title").GetComponent<Text>();
+        playerText.text = $"P{id}";
         Text buttonText = buttonGo.transform.Find("Text").GetComponent<Text>();
         buttonText.text = "Join";
 
@@ -159,11 +159,10 @@ public class LobbyMenu : MonoBehaviour
 
     public void PossessPanel(User user, ushort id)
     {
-        GameObject buttonGo = _playerPanels[id].transform.Find("Button").gameObject;
+        GameObject buttonGo = _playerPanels[id-1].transform.Find("Button").gameObject;
         
         buttonGo.GetComponent<Button>().onClick.RemoveAllListeners();
-        int playerId = id + 1;
-        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.UnpossessPlayer(Lobby.Instance.Local, (ushort)playerId); });
+        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.UnpossessPlayer(Lobby.Instance.Local, id); });
 
         Button button = buttonGo.GetComponent<Button>();
         Text buttonText = buttonGo.transform.Find("Text").GetComponent<Text>();
@@ -175,11 +174,11 @@ public class LobbyMenu : MonoBehaviour
             buttonGo.GetComponent<Button>().interactable = false;
         }
 
-        Text playerText = _playerPanels[id].transform.Find("Title").GetComponent<Text>();
+        Text playerText = _playerPanels[id - 1].transform.Find("Title").GetComponent<Text>();
         playerText.text = user.Name;
 
         GameObject entryGo = GetEntry(user);
         Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
-        pData.text = "P" + (id + 1).ToString();
+        pData.text = "P" + id.ToString();
     }
 }

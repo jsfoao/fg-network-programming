@@ -17,12 +17,6 @@ public class Lobby : MonoBehaviour
 
     [NonSerialized]
     public Spawner Spawner;
-    [SerializeField]
-    public User[] PlayerUsers;
-    [SerializeField]
-    public bool IsPossessing = false;
-    [SerializeField]
-    public ushort PlayerID;
 
     [SerializeField]
     public List<LobbyPlayer> Players;
@@ -47,8 +41,6 @@ public class Lobby : MonoBehaviour
             Instance = this;
         else
             Destroy(this);
-
-        PlayerUsers = new User[4];
 
         Multiplayer = GetComponent<Multiplayer>();
         Spawner = GetComponent<Spawner>();
@@ -159,6 +151,13 @@ public class Lobby : MonoBehaviour
             SetAdmin(Users[0]);
         }
 
+        foreach (var player in Players)
+        {
+            if (player.Owner == user)
+            {
+                player.Unpossess();
+            }
+        }
         OnRemovedUser.Invoke(Multiplayer, user);
 
         ProcedureParameters parameters = new ProcedureParameters();
