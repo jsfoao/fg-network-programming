@@ -31,7 +31,6 @@ public class PlayerController : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        Vector3 displacement = new Vector3(MoveDirection.x * moveSpeed, MoveDirection.y * moveSpeed, 0f);
-        transform.position += displacement * Time.deltaTime;
+        transform.position += transform.right * (MoveDirection.x * moveSpeed * Time.deltaTime);
     }
 }

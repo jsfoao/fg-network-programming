@@ -32,7 +32,7 @@ Transform:
   m_GameObject: {fileID: 1451866836131286065}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -130,7 +130,7 @@ MonoBehaviour:
       m_Groups: 
       m_Action: Movement
       m_Flags: 4
-    - m_Name: up
+    - m_Name: left
       m_Id: 1da6da68-9ef7-4c9d-abcf-8a7d2771baf8
       m_Path: <Keyboard>/w
       m_Interactions: 
@@ -138,7 +138,7 @@ MonoBehaviour:
       m_Groups: 
       m_Action: Movement
       m_Flags: 8
-    - m_Name: down
+    - m_Name: right
       m_Id: e6c78b71-f700-4a2d-94c4-052d2dd98888
       m_Path: <Keyboard>/s
       m_Interactions: 
