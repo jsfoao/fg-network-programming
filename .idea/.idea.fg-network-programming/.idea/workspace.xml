@@ -3,10 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="e8240252-7c44-4fd8-8836-da3a7504ebbd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.fg-network-programming/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.fg-network-programming/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Player.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Player.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/BallSpawn.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/BallSpawn.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlayerController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlayerController.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +81,7 @@
       <option name="presentableId" value="Default" />
       <updated>1673860130351</updated>
       <workItem from="1673860151254" duration="10459000" />
-      <workItem from="1673957812687" duration="17535000" />
+      <workItem from="1673957812687" duration="18947000" />
     </task>
     <servers />
   </component>
