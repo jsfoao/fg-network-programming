@@ -6,6 +6,7 @@ public class BallSpawn : MonoBehaviour
     [SerializeField] private Spawner spawner;
     [SerializeField] private Vector3 spawnPos;
     
+    
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.B))
@@ -13,4 +14,5 @@ public class BallSpawn : MonoBehaviour
             spawner.Spawn(0, spawnPos);
         }
     }
+    
 }

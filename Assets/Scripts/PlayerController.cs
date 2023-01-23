@@ -1,3 +1,4 @@
+using Alteruna;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,7 +24,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (avatar.IsMe)
+        if (avatar.Possessor == Lobby.Instance.Multiplayer.Me)
         {
             MoveDirection = movementAction.ReadValue<Vector2>();
         }
