@@ -1,9 +1,7 @@
 using Alteruna;
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
 using UnityEngine.UI;
 
 public class LobbyMenu : MonoBehaviour
@@ -30,20 +28,28 @@ public class LobbyMenu : MonoBehaviour
     {
         _lobby = Lobby.Instance;
         _userEntries = new List<Tuple<User, GameObject>>();
-        _lobby.Multiplayer.RoomJoined.AddListener(CreateAllUserEntries);
-        _lobby.Multiplayer.OtherUserJoined.AddListener(CreateUserEntry);
-        _lobby.Multiplayer.RoomLeft.AddListener(RemoveAllUserEntries);
-        _lobby.Multiplayer.OtherUserLeft.AddListener(RemoveUserEntry);
+        _lobby.OnAddedUser.AddListener(RefreshUserEntries);
+        _lobby.OnRemovedUser.AddListener(RemoveUserEntry);
 
         transform.Find("Chat").transform.Find("Input").GetComponent<InputField>().onSubmit.AddListener(SendChatMessage);
         _lobby.OnSendMessage.AddListener(CreateChatEntry);
-        //Lobby.Instance.OnPlayerUserPossess.AddListener(PossessPanel);
-        //Lobby.Instance.OnPlayerUserUnpossess.AddListener(UnpossessPanel);
+        Lobby.Instance.OnPossessedPlayer.AddListener(PossessPanel);
+        Lobby.Instance.OnUnpossessedPlayer.AddListener(UnpossessPanel);
 
         for (ushort i = 0; i < _playerPanels.Count; i++)
         {
-            UnpossessPanel(i, null);
+            UnpossessPanel(null, i);
         }
+    }
+
+    public void SendChatMessage(string message)
+    {
+        if (message == "")
+        {
+            transform.Find("Chat").transform.Find("Input").GetComponent<InputField>().ActivateInputField();
+            return;
+        }
+        _lobby.MessageUser(Lobby.Instance.Local, message);
     }
 
     public void CreateChatEntry(Multiplayer multiplayer, User user, string message, bool lobby)
@@ -65,11 +71,12 @@ public class LobbyMenu : MonoBehaviour
         }
     }
 
-    public void CreateAllUserEntries(Multiplayer multiplayer, Room room, User user)
+    public void RefreshUserEntries(Multiplayer multiplayer, User user)
     {
-        foreach (User roomUser in room.Users)
+        RemoveAllUserEntries();
+        foreach (User us in _lobby.Users)
         {
-            CreateUserEntry(multiplayer, roomUser);
+            CreateUserEntry(multiplayer, us);
         }
     }
 
@@ -93,7 +100,7 @@ public class LobbyMenu : MonoBehaviour
         _userEntries.Add(entry);
     }
 
-    public void RemoveAllUserEntries(Multiplayer multiplayer)
+    public void RemoveAllUserEntries()
     {
         foreach (var entry in _userEntries)
         {
@@ -127,11 +134,12 @@ public class LobbyMenu : MonoBehaviour
         return null;
     }
 
-    public void UnpossessPanel(ushort id, User user)
+    public void UnpossessPanel(User user, ushort id)
     {
         GameObject buttonGo = _playerPanels[id].transform.Find("Button").gameObject;
         buttonGo.GetComponent<Button>().onClick.RemoveAllListeners();
-        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.SetPlayerUser(id, Lobby.Instance.Multiplayer.Me); });
+        int playerId = id - 1;
+        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.PossessPlayer(Lobby.Instance.Local, (ushort)playerId); });
        
         Text playerText = _playerPanels[id].transform.Find("Title").GetComponent<Text>();
         playerText.text = $"P{id + 1}";
@@ -149,12 +157,13 @@ public class LobbyMenu : MonoBehaviour
         pData.text = "";
     }
 
-    public void PossessPanel(ushort id, User user)
+    public void PossessPanel(User user, ushort id)
     {
         GameObject buttonGo = _playerPanels[id].transform.Find("Button").gameObject;
         
         buttonGo.GetComponent<Button>().onClick.RemoveAllListeners();
-        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.RemovePlayerUser(id, Lobby.Instance.Multiplayer.Me); });
+        int playerId = id + 1;
+        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.UnpossessPlayer(Lobby.Instance.Local, (ushort)playerId); });
 
         Button button = buttonGo.GetComponent<Button>();
         Text buttonText = buttonGo.transform.Find("Text").GetComponent<Text>();
@@ -172,15 +181,5 @@ public class LobbyMenu : MonoBehaviour
         GameObject entryGo = GetEntry(user);
         Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
         pData.text = "P" + (id + 1).ToString();
-    }
-
-    public void SendChatMessage(string message) 
-    {
-        if (message == "")
-        {
-            transform.Find("Chat").transform.Find("Input").GetComponent<InputField>().ActivateInputField();
-            return;
-        }
-        _lobby.MessageUser(Lobby.Instance.Local, message);
     }
 }

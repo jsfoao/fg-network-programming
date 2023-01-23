@@ -8,17 +8,34 @@ public class LobbyPlayer : MonoBehaviour
     [NonSerialized]
     public Alteruna.Avatar Avatar;
 
+    [SerializeField]
+    public ushort ID;
+
     [SerializeField ]
-    public ushort AvatarID;
+    public User Owner;
 
     private void Start()
     {
         Avatar = GetComponent<Alteruna.Avatar>();
-        Avatar.OnPossessed.AddListener(Possessed);
     }
 
-    public void Possessed(User user)
+    public void Possess(User user)
     {
-        Debug.Log($"{user.Name} possessed avatar {AvatarID}");
+        if (Owner != null)
+        {
+            Unpossess();
+        }
+        Owner = user;
+        Avatar.OnPossessed.Invoke(user);
+    }
+
+    public void Unpossess()
+    {
+        if (Owner == null) 
+        {
+            return;
+        }
+        Avatar.OnUnpossessed.Invoke(Owner);
+        Owner = null;
     }
 }

@@ -2578,7 +2578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d72fdb47df513d46b553beea297736b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AvatarID: 1
+  ID: 1
 --- !u!1 &1139846976
 GameObject:
   m_ObjectHideFlags: 0
@@ -2845,7 +2845,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d72fdb47df513d46b553beea297736b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AvatarID: 4
+  ID: 4
 --- !u!114 &1287642085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2912,7 +2912,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d72fdb47df513d46b553beea297736b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AvatarID: 3
+  ID: 3
 --- !u!114 &1290233393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4145,7 +4145,6 @@ GameObject:
   - component: {fileID: 1948660488}
   - component: {fileID: 1948660489}
   - component: {fileID: 1948660491}
-  - component: {fileID: 1948660490}
   m_Layer: 0
   m_Name: Multiplayer
   m_TagString: Untagged
@@ -4277,7 +4276,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsPossessing: 0
   PlayerID: 0
+  Players:
+  - {fileID: 1130042430}
+  - {fileID: 2142409104}
+  - {fileID: 1290233392}
+  - {fileID: 1287642084}
   OnSendMessage:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAddedUser:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRemovedUser:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPossessedPlayer:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnpossessedPlayer:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &1948660489
@@ -4301,56 +4317,6 @@ MonoBehaviour:
   ObjectDespawned:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &1948660490
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1948660483}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6b5e10753160384abbc01152bc6edf8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Multiplayer: {fileID: 1948660484}
-  UID: {fileID: 0}
-  BucketBehaviors:
-  - Name: Min
-    NetLOD: 0
-    Frequency: -1
-    Pending: 0
-    LastUpdated: 0
-    NeverString: Never
-    RealtimeString: Realtime
-  - Name: Low
-    NetLOD: 1
-    Frequency: 0
-    Pending: 0
-    LastUpdated: 0
-    NeverString: Never
-    RealtimeString: Realtime
-  - Name: Mid
-    NetLOD: 2
-    Frequency: 0
-    Pending: 0
-    LastUpdated: 0
-    NeverString: Never
-    RealtimeString: Realtime
-  - Name: High
-    NetLOD: 3
-    Frequency: 0
-    Pending: 0
-    LastUpdated: 0
-    NeverString: Never
-    RealtimeString: Realtime
-  - Name: Max
-    NetLOD: 4
-    Frequency: 500
-    Pending: 0
-    LastUpdated: 0
-    NeverString: Never
-    RealtimeString: Realtime
 --- !u!114 &1948660491
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4667,7 +4633,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d72fdb47df513d46b553beea297736b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AvatarID: 2
+  ID: 2
 --- !u!114 &2142409105
 MonoBehaviour:
   m_ObjectHideFlags: 0
