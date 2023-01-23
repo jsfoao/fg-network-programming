@@ -1,6 +1,7 @@
 using Alteruna;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,6 +31,7 @@ public class LobbyMenu : MonoBehaviour
         _userEntries = new List<Tuple<User, GameObject>>();
         _lobby.OnAddedUser.AddListener(RefreshUserEntries);
         _lobby.OnRemovedUser.AddListener(RemoveUserEntry);
+        _lobby.OnSetAdmin.AddListener(SetAdmin);
 
         transform.Find("Chat").transform.Find("Input").GetComponent<InputField>().onSubmit.AddListener(SendChatMessage);
         _lobby.OnSendMessage.AddListener(CreateChatEntry);
@@ -99,6 +101,11 @@ public class LobbyMenu : MonoBehaviour
 
         Tuple<User, GameObject> entry = new Tuple<User, GameObject>(user, entryGo);
         _userEntries.Add(entry);
+
+        if (Lobby.Instance.Admin == user)
+        {
+            SetAdmin(multiplayer, user);
+        }
     }
 
     public void RemoveAllUserEntries()
@@ -152,9 +159,9 @@ public class LobbyMenu : MonoBehaviour
             return;
         }
 
-        GameObject entryGo = GetEntry(user);
-        Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
-        pData.text = "";
+        //GameObject entryGo = GetEntry(user);
+        //Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
+        //pData.text = "";
     }
 
     public void PossessPanel(User user, ushort id)
@@ -162,7 +169,7 @@ public class LobbyMenu : MonoBehaviour
         GameObject buttonGo = _playerPanels[id-1].transform.Find("Button").gameObject;
         
         buttonGo.GetComponent<Button>().onClick.RemoveAllListeners();
-        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.UnpossessPlayer(Lobby.Instance.Local, id); });
+        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.UnpossessPlayer(id); });
 
         Button button = buttonGo.GetComponent<Button>();
         Text buttonText = buttonGo.transform.Find("Text").GetComponent<Text>();
@@ -177,8 +184,25 @@ public class LobbyMenu : MonoBehaviour
         Text playerText = _playerPanels[id - 1].transform.Find("Title").GetComponent<Text>();
         playerText.text = user.Name;
 
-        GameObject entryGo = GetEntry(user);
-        Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
-        pData.text = "P" + id.ToString();
+        //GameObject entryGo = GetEntry(user);
+        //Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
+        //pData.text = "P" + id.ToString();
+    }
+
+    public void SetAdmin(Multiplayer multiplayer, User user)
+    {
+        foreach (var entry in _userEntries)
+        {
+            GameObject entryGo = entry.Item2;
+            Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
+            if (entry.Item1 == user)
+            {
+                pData.text = "(H)";
+            }
+            else
+            {
+                pData.text = "";
+            }
+        }
     }
 }

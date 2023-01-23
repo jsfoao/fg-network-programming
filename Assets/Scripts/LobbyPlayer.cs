@@ -26,6 +26,7 @@ public class LobbyPlayer : MonoBehaviour
             Unpossess();
         }
         Owner = user;
+        Avatar.Possessor = Owner;
         Avatar.OnPossessed.Invoke(user);
     }
 
@@ -37,5 +38,6 @@ public class LobbyPlayer : MonoBehaviour
         }
         Avatar.OnUnpossessed.Invoke(Owner);
         Owner = null;
+        Avatar.Possessor = null;
     }
 }
