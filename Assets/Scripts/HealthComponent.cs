@@ -20,12 +20,13 @@ public class HealthComponent : MonoBehaviour
         health--;
         ProcedureParameters parameters = new ProcedureParameters();
         parameters.Set("updatedHealth", health);
+        parameters.Set("User", Multiplayer.Me.Index);
         Multiplayer.InvokeRemoteProcedure("DecrementHealth", UserId.All, parameters);
     }
     private void Decrement_Health(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
     {
        health = parameters.Get("updatedHealth", 0);
-
+       ushort user = parameters.Get("User", (ushort)0);
     }
 
 }
