@@ -2,9 +2,17 @@ using Alteruna;
 using Alteruna.Trinity;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+
+[Serializable]
+public class PlayerData
+{
+    public User User;
+    public Transform SpawnLocation;
+}
 
 [RequireComponent(typeof(Multiplayer), typeof(Spawner))]
 public class Lobby : MonoBehaviour
@@ -17,8 +25,11 @@ public class Lobby : MonoBehaviour
     [NonSerialized]
     public Spawner Spawner;
 
+    [Header("Spawning")]
     [SerializeField]
-    public List<LobbyPlayer> Players;
+    public Transform CornerSpawn;
+    [SerializeField]
+    public List<PlayerData> PlayersData;
 
     // Ourselves, local user
     public User Local;
@@ -32,8 +43,12 @@ public class Lobby : MonoBehaviour
     public UnityEvent<Multiplayer, User> OnAddedUser;
     public UnityEvent<Multiplayer, User> OnRemovedUser;
     public UnityEvent<Multiplayer, User> OnSetAdmin;
-    public UnityEvent<User, ushort> OnPossessedPlayer;
-    public UnityEvent<User, ushort> OnUnpossessedPlayer;
+    public UnityEvent<User, ushort> OnPossessed;
+    public UnityEvent<User, ushort> OnUnpossessed;
+
+    // Match
+    public UnityEvent OnStartMatch;
+    public UnityEvent OnEndMatch;
 
     void Awake()
     {
@@ -53,12 +68,13 @@ public class Lobby : MonoBehaviour
         Multiplayer.OtherUserLeft.AddListener(OtherLeftRoom);
 
         Multiplayer.RegisterRemoteProcedure("Internal_Message", Internal_Message);
-
         Multiplayer.RegisterRemoteProcedure("Internal_SetAdmin", Internal_SetAdmin);
         Multiplayer.RegisterRemoteProcedure("Internal_AddUser", Internal_AddUser);
         Multiplayer.RegisterRemoteProcedure("Internal_RemoveUser", Internal_RemoveUser);
-        Multiplayer.RegisterRemoteProcedure("Internal_PossessPlayer", Internal_PossessPlayer);
-        Multiplayer.RegisterRemoteProcedure("Internal_UnpossessPlayer", Internal_UnpossessPlayer);
+        Multiplayer.RegisterRemoteProcedure("Internal_Possess", Internal_Possess);
+        Multiplayer.RegisterRemoteProcedure("Internal_Unpossess", Internal_Unpossess);
+        Multiplayer.RegisterRemoteProcedure("Internal_StartMatch", Internal_StartMatch);
+        Multiplayer.RegisterRemoteProcedure("Internal_EndMatch", Internal_EndMatch);
     }
 
     public void JoinedRoom(Multiplayer multiplayer, Room room, User user)
@@ -81,16 +97,6 @@ public class Lobby : MonoBehaviour
 
     public void LeftRoom(Multiplayer multiplayer)
     {
-
-        //for (ushort i = 0; i < PlayerUsers.Length; i++)
-        //{
-        //    if (PlayerUsers[i] == null)
-        //    {
-        //        continue;
-        //    }
-        //    RemovePlayerUser(i, PlayerUsers[i]);
-        //}
-        
         RemoveUser(Local);
         MessageLobby($"{Local.Name} left!");
     }
@@ -111,12 +117,18 @@ public class Lobby : MonoBehaviour
 
         // Send list of all users to new user
         ProcedureParameters parameters = new ProcedureParameters();
+        parameters.Set("adminId", Admin.Index);
         parameters.Set("count", Users.Count);
         for (int i = 0; i < Users.Count; i++)
         {
             string str = "user" + i.ToString();
             parameters.Set(str, Users[i].Index);
         }
+        //for (int i = 0; i < PlayersData.Count; i++)
+        //{
+        //    string str = "data" + i.ToString();
+        //    parameters.Set(str, PlayersData[i].User.Index);
+        //}
         parameters.Set("newUser", user.Index);
 
         OnAddedUser.Invoke(Multiplayer, user);
@@ -127,6 +139,7 @@ public class Lobby : MonoBehaviour
     {
         Users.Clear();
         User newUser = Multiplayer.GetUser(parameters.Get("newUser", (ushort)0));
+        User admin = Multiplayer.GetUser(parameters.Get("adminId", (ushort)0));
         int count = parameters.Get("count", 0);
         for (int i = 0; i < count; i++)
         {
@@ -134,7 +147,10 @@ public class Lobby : MonoBehaviour
             ushort id = parameters.Get(str, (ushort)0);
             Users.Add(Multiplayer.GetUser(id));
         }
+        Admin = admin;
         OnAddedUser.Invoke(Multiplayer, newUser);
+
+        Debug.Log($"Admin is {Admin.Name}");
     }
 
     public void RemoveUser(User user, ushort targetUser = (ushort)UserId.All)
@@ -145,18 +161,20 @@ public class Lobby : MonoBehaviour
         }
         Users.Remove(user);
 
+        for (int i = 0; i < PlayersData.Count; i++)
+        {
+            if (PlayersData[i].User == user)
+            {
+                ushort id = (ushort)i;
+                Unpossess(id);
+            }
+        }
+
         if (user == Admin && Users.Count > 0)
         {
             SetAdmin(Users[0]);
         }
 
-        foreach (var player in Players)
-        {
-            if (player.Owner == user)
-            {
-                player.Unpossess();
-            }
-        }
         OnRemovedUser.Invoke(Multiplayer, user);
 
         ProcedureParameters parameters = new ProcedureParameters();
@@ -219,86 +237,73 @@ public class Lobby : MonoBehaviour
         OnSendMessage.Invoke(Multiplayer, user, entry, lobby);
     }
 
-    public void PossessPlayer(User user, ushort playerId)
+    public void Possess(ushort id)
     {
-        foreach (var player in Players)
+        if (PlayersData[id].User != null)
         {
-            if (player.ID == playerId)
+            Unpossess(id);
+        }
+        for (int i = 0; i < PlayersData.Count; i++)
+        {
+            if (Local == PlayersData[i].User)
             {
-                player.Possess(user);
-                break;
+                ushort currId = (ushort)i;
+                Unpossess(currId);
             }
         }
 
-        OnPossessedPlayer.Invoke(user, playerId);
-        MessageLobby($"{user.Name} possessed player {playerId}");
+        PlayersData[id].User = Local;
+        Player player = GetPlayer(Local);
+        player.transform.position = PlayersData[id].SpawnLocation.position;
+        player.transform.rotation = PlayersData[id].SpawnLocation.rotation;
+
+        //MessageLobby($"{Local.Name} possessed player {id+1}");
+        OnPossessed.Invoke(Local, id);
+
+        ProcedureParameters parameters = new ProcedureParameters();
+        parameters.Set("userId", Local.Index);
+        parameters.Set("id", id);
+        Multiplayer.InvokeRemoteProcedure("Internal_Possess", UserId.All, parameters);
+    }
+
+    private void Internal_Possess(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
+    {
+        User user = Multiplayer.GetUser(parameters.Get("userId", (ushort)(0)));
+        ushort id = parameters.Get("id", (ushort)(0));
+        PlayersData[id].User = user;
+
+        //MessageLobby($"{user.Name} possessed player {id}");
+        OnPossessed.Invoke(user, id);
+    }
+
+    public void Unpossess(ushort id)
+    {
+        User user = PlayersData[id].User;
+        PlayersData[id].User = null;
+
+        Player player = GetPlayer(user);
+        player.transform.position = CornerSpawn.position;
+        player.transform.rotation = CornerSpawn.rotation;
+
+        //MessageLobby($"{user.Name} unpossessed player {id+1}");
+        OnUnpossessed.Invoke(user, id);
 
         ProcedureParameters parameters = new ProcedureParameters();
         parameters.Set("userId", user.Index);
-        parameters.Set("playerId", playerId);
+        parameters.Set("id", id);
 
-        Multiplayer.InvokeRemoteProcedure("Internal_PossessPlayer", UserId.All, parameters);
+        Multiplayer.InvokeRemoteProcedure("Internal_Unpossess", UserId.All, parameters);
     }
 
-    private void Internal_PossessPlayer(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
+    private void Internal_Unpossess(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
     {
         User user = Multiplayer.GetUser(parameters.Get("userId", (ushort)(0)));
-        ushort playerId = parameters.Get("playerId", (ushort)(0));
+        ushort id = parameters.Get("id", (ushort)(0));
 
-        foreach (var player in Players)
-        {
-            if (player.ID == playerId)
-            {
-                player.Possess(user);
-                break;
-            }
-        }
+        PlayersData[id].User = null;
 
-        MessageLobby($"{user.Name} possessed player {playerId}");
-        OnPossessedPlayer.Invoke(user, playerId);
-    }
-
-    public void UnpossessPlayer(ushort playerId)
-    {
-        LobbyPlayer player = null;
-        User owner = null;
-        foreach (var pl in Players)
-        {
-            if (pl.ID == playerId)
-            {
-                player = pl;
-                owner = player.Owner;
-                break;
-            }
-        }
-
-        MessageLobby($"{player.Owner.Name} unpossessed player {playerId}");
-        player.Unpossess();
-        OnUnpossessedPlayer.Invoke(owner, playerId);
-
-        ProcedureParameters parameters = new ProcedureParameters();
-        parameters.Set("userId", owner.Index);
-        parameters.Set("playerId", playerId);
-
-        Multiplayer.InvokeRemoteProcedure("Internal_UnpossessPlayer", UserId.All, parameters);
-    }
-
-    private void Internal_UnpossessPlayer(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
-    {
-        User user = Multiplayer.GetUser(parameters.Get("userId", (ushort)(0)));
-        ushort playerId = parameters.Get("playerId", (ushort)(0));
-
-        foreach (var pl in Players)
-        {
-            if (pl.ID == playerId)
-            {
-                pl.Unpossess();
-                break;
-            }
-        }
-
-        MessageLobby($"{user.Name} unpossessed player {playerId}");
-        OnUnpossessedPlayer.Invoke(user, playerId);
+        //MessageLobby($"{user.Name} unpossessed player {id}");
+        OnUnpossessed.Invoke(user, id);
     }
 
     public void SetAdmin(User user)
@@ -339,5 +344,80 @@ public class Lobby : MonoBehaviour
     public bool IsAdmin()
     {
         return Local == Admin;
+    }
+
+    public Player GetPlayer(User user)
+    {
+        Player[] players = FindObjectsOfType<Player>();
+        foreach (var player in players)
+        {
+            if (player.Avatar.Possessor == user)
+            {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    public void StartMatch(ushort targetUser = (ushort)UserId.All)
+    {
+        if (!IsAdmin())
+        {
+            return;
+        }
+
+        for (int i = 0; i < PlayersData.Count; i++)
+        {
+            User user = PlayersData[i].User;
+            if (user == null)
+            {
+                MessageLobby("Can't start. Not all players are possessed!");
+                return;
+            }
+            Player player = GetPlayer(user);
+            player.Enabled = true;
+        }
+
+        MessageLobby("Starting match...");
+        OnStartMatch.Invoke();
+
+        ProcedureParameters parameters = new ProcedureParameters();
+        Multiplayer.InvokeRemoteProcedure("Internal_StartMatch", targetUser, parameters);
+    }
+
+    private void Internal_StartMatch(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
+    {
+        for (int i = 0; i < PlayersData.Count; i++)
+        {
+            Player player = GetPlayer(PlayersData[i].User);
+            player.Enabled = true;
+        }
+
+        OnStartMatch.Invoke();
+    }
+
+    public void EndMatch(ushort targetUser = (ushort)UserId.All)
+    {
+        for (int i = 0; i < PlayersData.Count; i++)
+        {
+            Player player = GetPlayer(PlayersData[i].User);
+            player.Enabled = false;
+        }
+        MessageLobby("Ending match...");
+        OnEndMatch.Invoke();
+
+        ProcedureParameters parameters = new ProcedureParameters();
+        Multiplayer.InvokeRemoteProcedure("Internal_EndMatch", targetUser, parameters);
+    }
+
+    private void Internal_EndMatch(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
+    {
+        for (int i = 0; i < PlayersData.Count; i++)
+        {
+            Player player = GetPlayer(PlayersData[i].User);
+            player.Enabled = false;
+        }
+
+        OnEndMatch.Invoke();
     }
 }

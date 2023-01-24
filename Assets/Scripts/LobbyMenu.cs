@@ -4,6 +4,33 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.EventSystems.EventTrigger;
+
+public class UserEntry
+{
+    public User User;
+    public GameObject Go;
+
+    public UserEntry(User user, GameObject go)
+    {
+        User = user;
+        Go = go;
+    }
+}
+
+[Serializable]
+public class PlayerEntry
+{
+    public User User;
+    public GameObject Go;
+
+    public PlayerEntry(User user, GameObject go)
+    {
+        User = user;
+        Go = go;
+    }
+}
+
 
 public class LobbyMenu : MonoBehaviour
 {
@@ -15,41 +42,64 @@ public class LobbyMenu : MonoBehaviour
     private GameObject _userEntryParent;
 
     [Header("Chat")]
+    private ushort _maxChatEntries = 10;
     [SerializeField]
     private GameObject _chatEntryPrefab;
     [SerializeField]
     private GameObject _chatEntryParent;
-
-    private List<Tuple<User, GameObject>> _userEntries;
-
     [SerializeField]
-    private List<GameObject> _playerPanels;
+    private InputField _inputField;
+
+    [Header("Match")]
+    [SerializeField]
+    private GameObject _startButton;
+    [SerializeField]
+    private List<PlayerEntry> _playerEntries;
+
+    private List<UserEntry> _userEntries;
+    private List<GameObject> _chatEntries;
 
     private void Start()
     {
         _lobby = Lobby.Instance;
-        _userEntries = new List<Tuple<User, GameObject>>();
+        _userEntries = new List<UserEntry>();
+        _chatEntries = new List<GameObject>();
+
+        // User events
         _lobby.OnAddedUser.AddListener(RefreshUserEntries);
+        _lobby.OnAddedUser.AddListener(delegate { ClearChat(); });
         _lobby.OnRemovedUser.AddListener(RemoveUserEntry);
         _lobby.OnSetAdmin.AddListener(SetAdmin);
 
-        transform.Find("Chat").transform.Find("Input").GetComponent<InputField>().onSubmit.AddListener(SendChatMessage);
+        // Chat events
+        _inputField.onSubmit.AddListener(SendChatMessage);
         _lobby.OnSendMessage.AddListener(CreateChatEntry);
-        Lobby.Instance.OnPossessedPlayer.AddListener(PossessPanel);
-        Lobby.Instance.OnUnpossessedPlayer.AddListener(UnpossessPanel);
 
-        for (ushort i = 0; i < _playerPanels.Count; i++)
+        // Match events
+        _lobby.OnPossessed.AddListener(PossessPanel);
+        _lobby.OnUnpossessed.AddListener(UnpossessPanel);
+        _lobby.OnStartMatch.AddListener(HideMenu);
+        _lobby.OnEndMatch.AddListener(ShowMenu);
+        _startButton.GetComponent<Button>().onClick.AddListener(delegate { _lobby.StartMatch(); });
+
+        for (int i = 0; i < _playerEntries.Count; i++)
         {
-            int playerId = i + 1;
-            UnpossessPanel(null, (ushort)playerId);
+            Text title = _playerEntries[i].Go.transform.Find("Title").gameObject.GetComponent<Text>();
+            title.text = $"P{i + 1}";
+            Button join = _playerEntries[i].Go.transform.Find("Join").gameObject.GetComponent<Button>();
+            Button exit = _playerEntries[i].Go.transform.Find("Exit").gameObject.GetComponent<Button>();
+            ushort id = (ushort)i;
+            join.onClick.AddListener(delegate { _lobby.Possess(id); });
+            exit.onClick.AddListener(delegate { _lobby.Unpossess(id); });
         }
+
     }
 
     public void SendChatMessage(string message)
     {
         if (message == "")
         {
-            transform.Find("Chat").transform.Find("Input").GetComponent<InputField>().ActivateInputField();
+            _inputField.ActivateInputField();
             return;
         }
         _lobby.MessageUser(Lobby.Instance.Local, message);
@@ -57,8 +107,8 @@ public class LobbyMenu : MonoBehaviour
 
     public void CreateChatEntry(Multiplayer multiplayer, User user, string message, bool lobby)
     {
-        transform.Find("Chat").transform.Find("Input").GetComponent<InputField>().text = "";
-        transform.Find("Chat").transform.Find("Input").GetComponent<InputField>().ActivateInputField();
+        _inputField.text = "";
+        _inputField.ActivateInputField();
 
         GameObject entryGo = Instantiate(_chatEntryPrefab, _chatEntryParent.transform);
         Text entryText = entryGo.GetComponentInChildren<Text>();
@@ -72,6 +122,28 @@ public class LobbyMenu : MonoBehaviour
         {
             entryText.fontStyle = FontStyle.Normal;
         }
+
+        _chatEntries.Add(entryGo);
+
+        if (_chatEntries.Count >= _maxChatEntries)
+        {
+            RemoveChatEntry(0);
+        }
+    }
+
+    public void RemoveChatEntry(int i)
+    {
+        Destroy(_chatEntries[i]);
+        _chatEntries.RemoveAt(i);
+    }
+
+    public void ClearChat()
+    {
+        foreach (GameObject entry in _chatEntries)
+        {
+            Destroy(entry);
+        }
+        _chatEntries.Clear();
     }
 
     public void RefreshUserEntries(Multiplayer multiplayer, User user)
@@ -81,13 +153,14 @@ public class LobbyMenu : MonoBehaviour
         {
             CreateUserEntry(multiplayer, us);
         }
+        SetAdmin(multiplayer, _lobby.Admin);
     }
 
-    public void CreateUserEntry(Multiplayer multiplayer, User user)
+    public UserEntry CreateUserEntry(Multiplayer multiplayer, User user)
     {
-        GameObject entryGo = Instantiate(_userEntryPrefab, _userEntryParent.transform);
-        Text pText = entryGo.transform.Find("Name").GetComponent<Text>();
-        Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
+        GameObject go = Instantiate(_userEntryPrefab, _userEntryParent.transform);
+        Text pText = go.transform.Find("Name").GetComponent<Text>();
+        Text pData = go.transform.Find("Data").GetComponent<Text>();
 
         pText.text = user.Name;
         if (user == multiplayer.Me)
@@ -99,31 +172,37 @@ public class LobbyMenu : MonoBehaviour
             pText.fontStyle = FontStyle.Normal;
         }
 
-        Tuple<User, GameObject> entry = new Tuple<User, GameObject>(user, entryGo);
+        UserEntry entry = new UserEntry(user, go);
         _userEntries.Add(entry);
 
-        if (Lobby.Instance.Admin == user)
+        if (user == _lobby.Admin)
         {
             SetAdmin(multiplayer, user);
         }
+        return entry;
     }
 
     public void RemoveAllUserEntries()
     {
         foreach (var entry in _userEntries)
         {
-            Destroy(entry.Item2);
+            Destroy(entry.Go);
         }
         _userEntries.Clear();
     }
 
     public void RemoveUserEntry(Multiplayer multiplayer, User user)
     {
+        if (_lobby.Local == user)
+        {
+            RemoveAllUserEntries();
+            return;
+        }
         foreach (var entry in _userEntries)
         {
-            if (entry.Item1.Index == user.Index)
+            if (entry.User.Index == user.Index)
             {
-                Destroy(entry.Item2);
+                Destroy(entry.Go);
                 _userEntries.Remove(entry);
                 return;
             }
@@ -134,68 +213,53 @@ public class LobbyMenu : MonoBehaviour
     {
         foreach (var entry in _userEntries)
         {
-            if (entry.Item1 == user)
+            if (entry.User == user)
             {
-                return entry.Item2;
+                return entry.Go;
             }
         }
         return null;
     }
 
-    public void UnpossessPanel(User user, ushort id)
-    {
-        GameObject buttonGo = _playerPanels[id - 1].transform.Find("Button").gameObject;
-        buttonGo.GetComponent<Button>().onClick.RemoveAllListeners();
-        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.PossessPlayer(Lobby.Instance.Local, id); });
-       
-        Text playerText = _playerPanels[id - 1].transform.Find("Title").GetComponent<Text>();
-        playerText.text = $"P{id}";
-        Text buttonText = buttonGo.transform.Find("Text").GetComponent<Text>();
-        buttonText.text = "Join";
-
-        buttonGo.GetComponent<Button>().interactable = true;
-        if (user == null) 
-        {
-            return;
-        }
-
-        //GameObject entryGo = GetEntry(user);
-        //Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
-        //pData.text = "";
-    }
-
     public void PossessPanel(User user, ushort id)
     {
-        GameObject buttonGo = _playerPanels[id-1].transform.Find("Button").gameObject;
-        
-        buttonGo.GetComponent<Button>().onClick.RemoveAllListeners();
-        buttonGo.GetComponent<Button>().onClick.AddListener(delegate { _lobby.UnpossessPlayer(id); });
+        _playerEntries[id].User = user;
+        GameObject joinButton = _playerEntries[id].Go.transform.Find("Join").gameObject;
+        joinButton.SetActive(false);
 
-        Button button = buttonGo.GetComponent<Button>();
-        Text buttonText = buttonGo.transform.Find("Text").GetComponent<Text>();
-        buttonText.text = "Exit";
+        GameObject exitButton = _playerEntries[id].Go.transform.Find("Exit").gameObject;
+        exitButton.SetActive(true);
 
-        if (user.Index != Lobby.Instance.Multiplayer.Me.Index)
+        if (user != _lobby.Local)
         {
-            buttonText.text = "-";
-            buttonGo.GetComponent<Button>().interactable = false;
+            exitButton.GetComponent<Button>().interactable = false;
         }
 
-        Text playerText = _playerPanels[id - 1].transform.Find("Title").GetComponent<Text>();
-        playerText.text = user.Name;
+        Text title = _playerEntries[id].Go.transform.Find("Title").GetComponent<Text>();
+        title.text = user.Name;
+    }
 
-        //GameObject entryGo = GetEntry(user);
-        //Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
-        //pData.text = "P" + id.ToString();
+    public void UnpossessPanel(User user, ushort id)
+    {
+        _playerEntries[id].User = null;
+        GameObject joinButton = _playerEntries[id].Go.transform.Find("Join").gameObject;
+        joinButton.SetActive(true);
+
+        GameObject exitButton = _playerEntries[id].Go.transform.Find("Exit").gameObject;
+        exitButton.SetActive(false);
+
+        exitButton.GetComponent<Button>().interactable = true;
+
+        Text title = _playerEntries[id].Go.transform.Find("Title").GetComponent<Text>();
+        title.text = $"P{id+1}";
     }
 
     public void SetAdmin(Multiplayer multiplayer, User user)
     {
         foreach (var entry in _userEntries)
         {
-            GameObject entryGo = entry.Item2;
-            Text pData = entryGo.transform.Find("Data").GetComponent<Text>();
-            if (entry.Item1 == user)
+            Text pData = entry.Go.transform.Find("Data").GetComponent<Text>();
+            if (entry.User == user)
             {
                 pData.text = "(H)";
             }
@@ -204,5 +268,24 @@ public class LobbyMenu : MonoBehaviour
                 pData.text = "";
             }
         }
+
+        if (_lobby.Local == user)
+        {
+            _startButton.GetComponent<Button>().interactable = true;
+        }
+        else
+        {
+            _startButton.GetComponent<Button>().interactable = false;
+        }
+    }
+
+    private void HideMenu()
+    {
+        gameObject.SetActive(false);
+    }
+
+    private void ShowMenu()
+    {
+        gameObject.SetActive(true);
     }
 }
