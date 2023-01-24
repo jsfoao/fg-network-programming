@@ -8,7 +8,10 @@ public class BallSpawn : MonoBehaviour
 
     public void SpawnBall()
     {
-        spawner.Spawn(0, spawnPos);
+        if (Lobby.Instance.IsAdmin())
+        {
+            spawner.Spawn(0, spawnPos);
+        }
     }
     void Update()
     {
