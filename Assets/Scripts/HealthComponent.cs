@@ -15,7 +15,7 @@ public class HealthComponent : MonoBehaviour
         Multiplayer.RegisterRemoteProcedure("DecrementHealth", Decrement_Health);
     }
 
-    private void DecrementHealth()
+    public void DecrementHealth()
     {
         health--;
         ProcedureParameters parameters = new ProcedureParameters();
