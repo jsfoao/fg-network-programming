@@ -28,11 +28,19 @@ public class HealthComponent : MonoBehaviour
             Multiplayer.InvokeRemoteProcedure("DecrementHealth", UserId.All, parameters);
             if (health <= 0)
             {
-                GetComponent<Player>().Enabled = false;
+                DisablePlayer();
             }
         }
         
     }
+
+    private void DisablePlayer()
+    {
+        GetComponent<Player>().Enabled = false;
+        GetComponent<Renderer>().enabled = false;
+        GetComponent<Collider>().enabled = false;
+    }
+    
     private void Decrement_Health(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
     {
        health = parameters.Get("updatedHealth", 0);
