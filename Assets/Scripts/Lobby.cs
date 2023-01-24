@@ -115,21 +115,29 @@ public class Lobby : MonoBehaviour
         // Add new user
         Users.Add(user);
 
-        // Send list of all users to new user
         ProcedureParameters parameters = new ProcedureParameters();
+        parameters.Set("newUser", user.Index);
         parameters.Set("adminId", Admin.Index);
         parameters.Set("count", Users.Count);
+        // Send list of users
         for (int i = 0; i < Users.Count; i++)
         {
             string str = "user" + i.ToString();
             parameters.Set(str, Users[i].Index);
         }
-        //for (int i = 0; i < PlayersData.Count; i++)
-        //{
-        //    string str = "data" + i.ToString();
-        //    parameters.Set(str, PlayersData[i].User.Index);
-        //}
-        parameters.Set("newUser", user.Index);
+        // Send list of possessed players
+        for (int i = 0; i < PlayersData.Count; i++)
+        {
+            string str = "data" + i.ToString();
+            if (PlayersData[i].User != null)
+            {
+                parameters.Set(str, PlayersData[i].User.Index);
+            }
+            else
+            {
+                parameters.Set(str, ushort.MaxValue);
+            }
+        }
 
         OnAddedUser.Invoke(Multiplayer, user);
         Multiplayer.InvokeRemoteProcedure("Internal_AddUser", targetUser, parameters);
@@ -146,6 +154,16 @@ public class Lobby : MonoBehaviour
             string str = "user" + i.ToString();
             ushort id = parameters.Get(str, (ushort)0);
             Users.Add(Multiplayer.GetUser(id));
+        }
+        for (int i = 0; i < PlayersData.Count; i++)
+        {
+            string str = "data" + i.ToString();
+            ushort id = parameters.Get(str, (ushort)0);
+            if (id != ushort.MaxValue)
+            {
+                ushort playerId = (ushort)i;
+                Possess(Multiplayer.GetUser(id), playerId);
+            }
         }
         Admin = admin;
         OnAddedUser.Invoke(Multiplayer, newUser);
@@ -237,7 +255,7 @@ public class Lobby : MonoBehaviour
         OnSendMessage.Invoke(Multiplayer, user, entry, lobby);
     }
 
-    public void Possess(ushort id)
+    public void Possess(User user, ushort id)
     {
         if (PlayersData[id].User != null)
         {
@@ -245,23 +263,23 @@ public class Lobby : MonoBehaviour
         }
         for (int i = 0; i < PlayersData.Count; i++)
         {
-            if (Local == PlayersData[i].User)
+            if (user == PlayersData[i].User)
             {
                 ushort currId = (ushort)i;
                 Unpossess(currId);
             }
         }
 
-        PlayersData[id].User = Local;
-        Player player = GetPlayer(Local);
+        PlayersData[id].User = user;
+        Player player = GetPlayer(user);
         player.transform.position = PlayersData[id].SpawnLocation.position;
         player.transform.rotation = PlayersData[id].SpawnLocation.rotation;
 
         //MessageLobby($"{Local.Name} possessed player {id+1}");
-        OnPossessed.Invoke(Local, id);
+        OnPossessed.Invoke(user, id);
 
         ProcedureParameters parameters = new ProcedureParameters();
-        parameters.Set("userId", Local.Index);
+        parameters.Set("userId", user.Index);
         parameters.Set("id", id);
         Multiplayer.InvokeRemoteProcedure("Internal_Possess", UserId.All, parameters);
     }

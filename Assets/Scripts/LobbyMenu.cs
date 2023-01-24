@@ -89,7 +89,7 @@ public class LobbyMenu : MonoBehaviour
             Button join = _playerEntries[i].Go.transform.Find("Join").gameObject.GetComponent<Button>();
             Button exit = _playerEntries[i].Go.transform.Find("Exit").gameObject.GetComponent<Button>();
             ushort id = (ushort)i;
-            join.onClick.AddListener(delegate { _lobby.Possess(id); });
+            join.onClick.AddListener(delegate { _lobby.Possess(_lobby.Local, id); });
             exit.onClick.AddListener(delegate { _lobby.Unpossess(id); });
         }
 
