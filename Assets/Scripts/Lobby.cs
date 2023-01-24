@@ -12,6 +12,7 @@ public class PlayerData
 {
     public User User;
     public Transform SpawnLocation;
+    public Walls Goal;
 }
 
 [RequireComponent(typeof(Multiplayer), typeof(Spawner))]

@@ -123,6 +123,40 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &85465429 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6582618415475080221, guid: e34eaaf7f74cec4469c1e83cba6cbb9a, type: 3}
+  m_PrefabInstance: {fileID: 1600630340}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &85465432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 85465429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a7efaba4fb5bd644aba54064537c9f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &625670345 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6582618415287393154, guid: e34eaaf7f74cec4469c1e83cba6cbb9a, type: 3}
+  m_PrefabInstance: {fileID: 1600630340}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &625670348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 625670345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a7efaba4fb5bd644aba54064537c9f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &635048854
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -800,6 +834,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e34eaaf7f74cec4469c1e83cba6cbb9a, type: 3}
+--- !u!1 &1743752802 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6582618415865897419, guid: e34eaaf7f74cec4469c1e83cba6cbb9a, type: 3}
+  m_PrefabInstance: {fileID: 1600630340}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1743752805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743752802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a7efaba4fb5bd644aba54064537c9f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1975432289
 GameObject:
   m_ObjectHideFlags: 0
@@ -894,6 +945,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &2009499169 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6582618415149016250, guid: e34eaaf7f74cec4469c1e83cba6cbb9a, type: 3}
+  m_PrefabInstance: {fileID: 1600630340}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2009499172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009499169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a7efaba4fb5bd644aba54064537c9f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &8341002036190322729
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -905,6 +973,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Multiplayer
       objectReference: {fileID: 0}
+    - target: {fileID: 8341002035646611014, guid: 25da88dec89bf6f41a9384cb201bb5ae, type: 3}
+      propertyPath: PlayersData.Array.data[0].Goal
+      value: 
+      objectReference: {fileID: 85465432}
+    - target: {fileID: 8341002035646611014, guid: 25da88dec89bf6f41a9384cb201bb5ae, type: 3}
+      propertyPath: PlayersData.Array.data[1].Goal
+      value: 
+      objectReference: {fileID: 1743752805}
+    - target: {fileID: 8341002035646611014, guid: 25da88dec89bf6f41a9384cb201bb5ae, type: 3}
+      propertyPath: PlayersData.Array.data[2].Goal
+      value: 
+      objectReference: {fileID: 2009499172}
+    - target: {fileID: 8341002035646611014, guid: 25da88dec89bf6f41a9384cb201bb5ae, type: 3}
+      propertyPath: PlayersData.Array.data[3].Goal
+      value: 
+      objectReference: {fileID: 625670348}
     - target: {fileID: 8341002035646611014, guid: 25da88dec89bf6f41a9384cb201bb5ae, type: 3}
       propertyPath: OnStartMatch.m_PersistentCalls.m_Calls.Array.size
       value: 1
