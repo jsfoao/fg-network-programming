@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Walls : MonoBehaviour
 {
+    [SerializeField] private int PlayerIndex;   
     private Player owningPlayer;
     private HealthComponent health;
     private void Start()
@@ -10,7 +11,7 @@ public class Walls : MonoBehaviour
     }
     private void SetHealthComponent()
     {
-        owningPlayer = Lobby.Instance.GetPlayer(Lobby.Instance.PlayersData[0].User);
+        owningPlayer = Lobby.Instance.GetPlayer(Lobby.Instance.PlayersData[PlayerIndex].User);
         health = owningPlayer.GetComponent<HealthComponent>();
     }
  
