@@ -12,8 +12,11 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 MoveDirection;
 
+    private Player player;
+
     private void OnEnable()
     {
+        player = GetComponent<Player>();
         movementAction.Enable();
     }
 
@@ -24,7 +27,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (avatar.Possessor == Lobby.Instance.Multiplayer.Me)
+        if (avatar.Possessor == Lobby.Instance.Multiplayer.Me && player.Enabled)
         {
             MoveDirection = movementAction.ReadValue<Vector2>();
         }

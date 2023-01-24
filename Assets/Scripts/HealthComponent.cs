@@ -1,6 +1,7 @@
 using Alteruna;
 using Alteruna.Trinity;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class HealthComponent : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class HealthComponent : MonoBehaviour
     [SerializeField] private int health = 5;
 
     public Multiplayer Multiplayer { get; set; }
+
 
     private void Start()
     {
@@ -17,11 +19,19 @@ public class HealthComponent : MonoBehaviour
 
     public void DecrementHealth()
     {
-        health--;
-        ProcedureParameters parameters = new ProcedureParameters();
-        parameters.Set("updatedHealth", health);
-        parameters.Set("User", Multiplayer.Me.Index);
-        Multiplayer.InvokeRemoteProcedure("DecrementHealth", UserId.All, parameters);
+        if (health > 0)
+        {
+            health--;
+            ProcedureParameters parameters = new ProcedureParameters();
+            parameters.Set("updatedHealth", health);
+            parameters.Set("User", Multiplayer.Me.Index);
+            Multiplayer.InvokeRemoteProcedure("DecrementHealth", UserId.All, parameters);
+            if (health <= 0)
+            {
+                GetComponent<Player>().Enabled = false;
+            }
+        }
+        
     }
     private void Decrement_Health(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
     {
