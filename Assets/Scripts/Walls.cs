@@ -17,6 +17,9 @@ public class Walls : MonoBehaviour
  
     private void OnCollisionEnter(Collision collision)
     {
-        health.DecrementHealth();
+        if (collision.gameObject.GetComponent<Ball>())
+        {
+            health.DecrementHealth();
+        }
     }
 }
