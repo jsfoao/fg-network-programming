@@ -984,6 +984,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 8341002034968639238, guid: 25da88dec89bf6f41a9384cb201bb5ae, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 8341002035646611012, guid: 25da88dec89bf6f41a9384cb201bb5ae, type: 3}
       propertyPath: m_Name
       value: Multiplayer
@@ -1055,6 +1059,10 @@ PrefabInstance:
     - target: {fileID: 8341002035646611015, guid: 25da88dec89bf6f41a9384cb201bb5ae, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8341002036925815196, guid: 25da88dec89bf6f41a9384cb201bb5ae, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 5.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 25da88dec89bf6f41a9384cb201bb5ae, type: 3}
