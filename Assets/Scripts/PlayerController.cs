@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (avatar.Possessor == Lobby.Instance.Multiplayer.Me && player.Enabled)
+        if (avatar.Possessor == Lobby.Instance.Multiplayer.Me)
         {
             MoveDirection = movementAction.ReadValue<Vector2>();
         }
@@ -35,6 +35,10 @@ public class PlayerController : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        transform.position += transform.right * (MoveDirection.x * moveSpeed * Time.deltaTime);
+        if (player.Enabled)
+        {
+            transform.position += transform.right * (MoveDirection.x * moveSpeed * Time.deltaTime);
+        }
+        
     }
 }
