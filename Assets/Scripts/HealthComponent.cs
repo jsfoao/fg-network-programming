@@ -8,6 +8,9 @@ public class HealthComponent : MonoBehaviour
 
     [SerializeField] private int health = 5;
 
+    public delegate void PlayerDeath();
+    public static event PlayerDeath OnDeath;
+
     public Multiplayer Multiplayer { get; set; }
 
 
@@ -29,6 +32,7 @@ public class HealthComponent : MonoBehaviour
             if (health <= 0)
             {
                 DisablePlayer();
+                OnDeath?.Invoke();
             }
         }
         
