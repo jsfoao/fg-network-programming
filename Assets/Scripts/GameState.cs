@@ -40,7 +40,6 @@ public class GameState : MonoBehaviour
     {
         Lobby.Instance.MessageLobby("trying to remove user: " + user.Index);
         alivePlayers.Remove(user);
-        
         Lobby.Instance.MessageLobby("num players alive: " + alivePlayers.Count);
         
 
@@ -71,11 +70,6 @@ public class GameState : MonoBehaviour
         
         if (!Lobby.Instance.IsAdmin()) return;
         
-        if (alivePlayers.Count <= 1)
-        {
-            Lobby.Instance.MessageLobby("Game Over");
-            Lobby.Instance.EndMatch();
-        }
     }
     
 }
