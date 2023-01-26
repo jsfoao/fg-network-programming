@@ -39,12 +39,12 @@ public class GameState : MonoBehaviour
 
     public void PlayerDied(User user)
     {
-        
+        Debug.Log("trying to remove local: " + user.Index);
         Lobby.Instance.MessageLobby("trying to remove user: " + user.Index);
         alivePlayers.Remove(user);
         
         Lobby.Instance.MessageLobby("num players alive: " + alivePlayers.Count);
-        
+        Debug.Log("local num alive: " + alivePlayers.Count);
 
         ProcedureParameters parameters = new ProcedureParameters();
         parameters.Set("user", user.Index);
@@ -64,7 +64,7 @@ public class GameState : MonoBehaviour
     private void Decrement_Num_Players(ushort fromUser, ProcedureParameters parameters, uint callId,
         ITransportStreamReader processor)
     {
-        ushort userID = parameters.Get("user", (ushort)0);
+        ushort userID = parameters.Get("user", (ushort)666);
 
         User user = Lobby.Instance.Multiplayer.GetUser(userID);
         
