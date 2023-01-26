@@ -31,6 +31,8 @@ public class GameState : MonoBehaviour
     {
         foreach (var playerData in Lobby.Instance.PlayersData)
         {
+            if (playerData.User == null) continue;
+             
             alivePlayers.Add(playerData.User);
             Lobby.Instance.MessageLobby("added user: " + playerData.User.Index);
             Debug.Log("adding user local: " + playerData.User.Index);
