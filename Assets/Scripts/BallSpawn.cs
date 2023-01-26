@@ -19,8 +19,7 @@ public class BallSpawn : MonoBehaviour
     {
         if (ball != null)
         {
-            Destroy(ball);
-            
+            spawner.Despawn(ball);
         }
     }
     void Update()
