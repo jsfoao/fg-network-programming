@@ -19,7 +19,7 @@ public class Walls : MonoBehaviour
     {
         if (collision.gameObject.GetComponent<Ball>())
         {
-            health.DecrementHealth();
+            health.DecrementHealth(owningPlayer);
         }
     }
 }

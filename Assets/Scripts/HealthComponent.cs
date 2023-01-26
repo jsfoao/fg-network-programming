@@ -22,20 +22,24 @@ public class HealthComponent : MonoBehaviour
         Lobby.Instance.OnStartMatch.AddListener(EnablePlayer);
     }
 
-    public void DecrementHealth()
+    public void DecrementHealth(Player player)
     {
+        if (!Lobby.Instance.IsAdmin()) return;
+        
         if (currentHealth > 0)
         {
+            ushort user = player.Avatar.Possessor.Index;
             Debug.Log("decrementing health");
             currentHealth--;
             ProcedureParameters parameters = new ProcedureParameters();
             parameters.Set("updatedHealth", currentHealth);
-            parameters.Set("User", Multiplayer.Me.Index);
+            parameters.Set("User", user);
             Multiplayer.InvokeRemoteProcedure("DecrementHealth", UserId.All, parameters);
+            
             if (currentHealth <= 0)
             {
                 DisablePlayer();
-                OnDeath?.Invoke(Lobby.Instance.Multiplayer.Me.Index);
+                OnDeath?.Invoke(user);
             }
         }
         
