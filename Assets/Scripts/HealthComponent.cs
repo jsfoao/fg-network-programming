@@ -34,7 +34,7 @@ public class HealthComponent : MonoBehaviour
             if (currentHealth <= 0)
             {
                 DisablePlayer();
-                OnDeath?.Invoke(Lobby.Instance.Local);
+                OnDeath?.Invoke(Lobby.Instance.Multiplayer.Me);
             }
         }
         
