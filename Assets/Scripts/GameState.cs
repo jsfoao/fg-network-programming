@@ -39,6 +39,7 @@ public class GameState : MonoBehaviour
     {
         alivePlayers.Remove(user);
         
+        Lobby.Instance.MessageLobby("num players alive: " + alivePlayers.Count);
 
         ProcedureParameters parameters = new ProcedureParameters();
         parameters.Set("user", user.Index);
