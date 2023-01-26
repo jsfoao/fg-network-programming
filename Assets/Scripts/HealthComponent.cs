@@ -9,7 +9,7 @@ public class HealthComponent : MonoBehaviour
     [SerializeField] private int health = 5;
     private int currentHealth;
 
-    public delegate void PlayerDeath(User user);
+    public delegate void PlayerDeath(ushort id);
     public static event PlayerDeath OnDeath;
 
     public Multiplayer Multiplayer { get; set; }
@@ -26,6 +26,7 @@ public class HealthComponent : MonoBehaviour
     {
         if (currentHealth > 0)
         {
+            Debug.Log("decrementing health");
             currentHealth--;
             ProcedureParameters parameters = new ProcedureParameters();
             parameters.Set("updatedHealth", currentHealth);
@@ -34,7 +35,7 @@ public class HealthComponent : MonoBehaviour
             if (currentHealth <= 0)
             {
                 DisablePlayer();
-                OnDeath?.Invoke(Lobby.Instance.Multiplayer.Me);
+                OnDeath?.Invoke(Lobby.Instance.Multiplayer.Me.Index);
             }
         }
         

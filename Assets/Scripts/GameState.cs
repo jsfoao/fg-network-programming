@@ -7,11 +7,11 @@ using UnityEngine;
 public class GameState : MonoBehaviour
 {
 
-    private List<User> alivePlayers;
+    private List<ushort> alivePlayers;
  
     private void Start()
     {
-        alivePlayers = new List<User>();
+        alivePlayers = new List<ushort>();
         Lobby.Instance.Multiplayer.RegisterRemoteProcedure("Decrement_Num_Players", Decrement_Num_Players);
     }
 
@@ -37,17 +37,17 @@ public class GameState : MonoBehaviour
         }
     }
 
-    public void PlayerDied(User user)
+    public void PlayerDied(ushort id)
     {
-        Debug.Log("trying to remove local: " + user.Index);
-        Lobby.Instance.MessageLobby("trying to remove user: " + user.Index);
-        alivePlayers.Remove(user);
+        Debug.Log("trying to remove local: " + id);
+        Lobby.Instance.MessageLobby("trying to remove user: " + id);
+        alivePlayers.Remove(id);
         
         Lobby.Instance.MessageLobby("num players alive: " + alivePlayers.Count);
         Debug.Log("local num alive: " + alivePlayers.Count);
 
         ProcedureParameters parameters = new ProcedureParameters();
-        parameters.Set("user", user.Index);
+        parameters.Set("user", id);
         
         Lobby.Instance.Multiplayer.InvokeRemoteProcedure("Decrement_Num_Players", UserId.All, parameters);
         
@@ -68,7 +68,7 @@ public class GameState : MonoBehaviour
 
         User user = Lobby.Instance.Multiplayer.GetUser(userID);
         
-        alivePlayers.Remove(user);
+        alivePlayers.Remove(userID);
         Lobby.Instance.GetPlayer(user).GetComponent<HealthComponent>().DisablePlayer();
         
         if (!Lobby.Instance.IsAdmin()) return;

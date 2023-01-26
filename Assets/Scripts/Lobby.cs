@@ -391,7 +391,7 @@ public class Lobby : MonoBehaviour
             if (user == null)
             {
                 MessageLobby("Can't start. Not all players are possessed!");
-                return;
+                continue;
             }
             Player player = GetPlayer(user);
             player.Enabled = true;
