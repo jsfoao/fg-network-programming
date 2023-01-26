@@ -32,17 +32,22 @@ public class GameState : MonoBehaviour
         foreach (var playerData in Lobby.Instance.PlayersData)
         {
             alivePlayers.Add(playerData.User);
+            Lobby.Instance.MessageLobby("added user: " + playerData.User.Index);
         }
     }
 
     public void PlayerDied(User user)
     {
+        Lobby.Instance.MessageLobby("trying to remove user: " + user.Index);
         alivePlayers.Remove(user);
         
         Lobby.Instance.MessageLobby("num players alive: " + alivePlayers.Count);
+        
 
         ProcedureParameters parameters = new ProcedureParameters();
         parameters.Set("user", user.Index);
+        
+        Lobby.Instance.Multiplayer.InvokeRemoteProcedure("Decrement_Num_Players", UserId.All, parameters);
         
         if (!Lobby.Instance.IsAdmin()) return;
         
@@ -52,7 +57,6 @@ public class GameState : MonoBehaviour
             Lobby.Instance.EndMatch();
         }
         
-        Lobby.Instance.Multiplayer.InvokeRemoteProcedure("Decrement_Num_Players", UserId.All, parameters);
     }
 
     private void Decrement_Num_Players(ushort fromUser, ProcedureParameters parameters, uint callId,
