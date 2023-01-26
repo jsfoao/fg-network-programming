@@ -29,6 +29,7 @@ public class GameState : MonoBehaviour
 
     private void SetPlayers()
     {
+        alivePlayers.Clear();
         foreach (var playerData in Lobby.Instance.PlayersData)
         {
             if (playerData.User == null) continue;
