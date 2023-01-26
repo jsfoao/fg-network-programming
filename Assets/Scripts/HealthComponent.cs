@@ -9,7 +9,7 @@ public class HealthComponent : MonoBehaviour
     [SerializeField] private int health = 5;
     private int currentHealth;
 
-    public delegate void PlayerDeath();
+    public delegate void PlayerDeath(User user);
     public static event PlayerDeath OnDeath;
 
     public Multiplayer Multiplayer { get; set; }
@@ -34,7 +34,7 @@ public class HealthComponent : MonoBehaviour
             if (currentHealth <= 0)
             {
                 DisablePlayer();
-                OnDeath?.Invoke();
+                OnDeath?.Invoke(Lobby.Instance.Local);
             }
         }
         
@@ -48,7 +48,7 @@ public class HealthComponent : MonoBehaviour
         GetComponent<Collider>().enabled = true;
     }
     
-    private void DisablePlayer()
+    public void DisablePlayer()
     {
         GetComponent<Player>().Enabled = false;
         GetComponent<Renderer>().enabled = false;
@@ -58,13 +58,6 @@ public class HealthComponent : MonoBehaviour
     private void Decrement_Health(ushort fromUser, ProcedureParameters parameters, uint callId, ITransportStreamReader processor)
     {
        currentHealth = parameters.Get("updatedHealth", 0);
-       ushort user = parameters.Get("User", (ushort)0);
-       
-       if (currentHealth <= 0)
-       {
-           DisablePlayer();
-           OnDeath?.Invoke();
-       }
     }
 
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Alteruna;
 using Alteruna.Trinity;
 using UnityEngine;
@@ -6,8 +7,8 @@ using UnityEngine;
 public class GameState : MonoBehaviour
 {
 
-    private int numPlayers;
-
+    private List<User> alivePlayers;
+ 
     private void Start()
     {
         Lobby.Instance.Multiplayer.RegisterRemoteProcedure("Decrement_Num_Players", Decrement_Num_Players);
@@ -27,32 +28,48 @@ public class GameState : MonoBehaviour
 
     private void SetPlayers()
     {
-        // called after game has been inited and player data verified in Lobby
-        // so we can be sure PlayersData == how many players.
-        numPlayers = Lobby.Instance.PlayersData.Count;
+        foreach (var playerData in Lobby.Instance.PlayersData)
+        {
+            alivePlayers.Add(playerData.User);
+        }
     }
 
-    public void PlayerDied()
+    public void PlayerDied(User user)
     {
-        numPlayers--;
+        alivePlayers.Remove(user);
+        
 
         ProcedureParameters parameters = new ProcedureParameters();
-        parameters.Set("numPlayers", numPlayers);
-        Lobby.Instance.Multiplayer.InvokeRemoteProcedure("Decrement_Num_Players", UserId.All, parameters);
+        parameters.Set("user", user.Index);
         
         if (!Lobby.Instance.IsAdmin()) return;
         
-        if (numPlayers <= 1)
+        if (alivePlayers.Count <= 1)
         {
             Lobby.Instance.MessageLobby("Game Over");
             Lobby.Instance.EndMatch();
         }
+        
+        Lobby.Instance.Multiplayer.InvokeRemoteProcedure("Decrement_Num_Players", UserId.All, parameters);
     }
 
     private void Decrement_Num_Players(ushort fromUser, ProcedureParameters parameters, uint callId,
         ITransportStreamReader processor)
     {
-        numPlayers = parameters.Get("numPlayers", 4);
+        ushort userID = parameters.Get("user", (ushort)0);
+
+        User user = Lobby.Instance.Multiplayer.GetUser(userID);
+        
+        alivePlayers.Remove(user);
+        Lobby.Instance.GetPlayer(user).GetComponent<HealthComponent>().DisablePlayer();
+        
+        if (!Lobby.Instance.IsAdmin()) return;
+        
+        if (alivePlayers.Count <= 1)
+        {
+            Lobby.Instance.MessageLobby("Game Over");
+            Lobby.Instance.EndMatch();
+        }
     }
     
 }
