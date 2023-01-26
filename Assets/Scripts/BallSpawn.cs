@@ -15,10 +15,10 @@ public class BallSpawn : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            spawner.Spawn(0, spawnPos);
-        }
+        //if (Input.GetKeyDown(KeyCode.B))
+        //{
+        //    spawner.Spawn(0, spawnPos);
+        //}
     }
     
 }
