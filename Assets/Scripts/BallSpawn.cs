@@ -5,12 +5,22 @@ public class BallSpawn : MonoBehaviour
 {
     [SerializeField] private Spawner spawner;
     [SerializeField] private Vector3 spawnPos;
+    private GameObject ball;
 
     public void SpawnBall()
     {
         if (Lobby.Instance.IsAdmin())
         {
-            spawner.Spawn(0, spawnPos);
+            ball = spawner.Spawn(0, spawnPos);
+        }
+    }
+
+    public void RemoveBall()
+    {
+        if (ball != null)
+        {
+            Destroy(ball);
+            
         }
     }
     void Update()
