@@ -420,6 +420,10 @@ public class Lobby : MonoBehaviour
         for (int i = 0; i < PlayersData.Count; i++)
         {
             Player player = GetPlayer(PlayersData[i].User);
+            if (player == null)
+            {
+                continue;
+            }
             player.Enabled = false;
         }
         MessageLobby("Ending match...");
@@ -434,6 +438,10 @@ public class Lobby : MonoBehaviour
         for (int i = 0; i < PlayersData.Count; i++)
         {
             Player player = GetPlayer(PlayersData[i].User);
+            if (player == null)
+            {
+                continue;
+            }
             player.Enabled = false;
         }
 
