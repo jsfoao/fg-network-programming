@@ -18,6 +18,7 @@ public class HealthComponent : MonoBehaviour
     {
         Multiplayer = Lobby.Instance.Multiplayer;
         Multiplayer.RegisterRemoteProcedure("DecrementHealth", Decrement_Health);
+        Lobby.Instance.OnStartMatch.AddListener(EnablePlayer);
     }
 
     public void DecrementHealth()
@@ -38,6 +39,13 @@ public class HealthComponent : MonoBehaviour
         
     }
 
+    private void EnablePlayer()
+    {
+        GetComponent<Player>().Enabled = true;
+        GetComponent<Renderer>().enabled = true;
+        GetComponent<Collider>().enabled = true;
+    }
+    
     private void DisablePlayer()
     {
         GetComponent<Player>().Enabled = false;
