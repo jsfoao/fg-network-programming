@@ -1,14 +1,18 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Alteruna;
+using Alteruna.Trinity;
 using UnityEngine;
 
 public class GameState : MonoBehaviour
 {
 
     private int numPlayers;
-    
+
+    private void Start()
+    {
+        Lobby.Instance.Multiplayer.RegisterRemoteProcedure("Decrement_Num_Players", Decrement_Num_Players);
+    }
+
     private void OnEnable()
     {
         Lobby.Instance.OnStartMatch.AddListener(SetPlayers);
@@ -28,9 +32,16 @@ public class GameState : MonoBehaviour
         numPlayers = Lobby.Instance.PlayersData.Count;
     }
 
-    private void PlayerDied()
+    public void PlayerDied()
     {
         numPlayers--;
+
+        ProcedureParameters parameters = new ProcedureParameters();
+        parameters.Set("numPlayers", numPlayers);
+        Lobby.Instance.Multiplayer.InvokeRemoteProcedure("Decrement_Num_Players", UserId.All, parameters);
+        
+        if (!Lobby.Instance.IsAdmin()) return;
+        
         if (numPlayers <= 1)
         {
             Lobby.Instance.MessageLobby("Game Over");
@@ -38,15 +49,10 @@ public class GameState : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
+    private void Decrement_Num_Players(ushort fromUser, ProcedureParameters parameters, uint callId,
+        ITransportStreamReader processor)
     {
-        
+        numPlayers = parameters.Get("numPlayers", 4);
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 }

@@ -59,6 +59,12 @@ public class HealthComponent : MonoBehaviour
     {
        currentHealth = parameters.Get("updatedHealth", 0);
        ushort user = parameters.Get("User", (ushort)0);
+       
+       if (currentHealth <= 0)
+       {
+           DisablePlayer();
+           OnDeath?.Invoke();
+       }
     }
 
 }
