@@ -11,6 +11,7 @@ public class GameState : MonoBehaviour
  
     private void Start()
     {
+        alivePlayers = new List<User>();
         Lobby.Instance.Multiplayer.RegisterRemoteProcedure("Decrement_Num_Players", Decrement_Num_Players);
     }
 
