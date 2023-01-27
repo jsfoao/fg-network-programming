@@ -394,6 +394,10 @@ public class Lobby : MonoBehaviour
                 continue;
             }
             Player player = GetPlayer(user);
+            if (player == null)
+            {
+                continue;
+            }
             player.Enabled = true;
         }
 
@@ -409,6 +413,10 @@ public class Lobby : MonoBehaviour
         for (int i = 0; i < PlayersData.Count; i++)
         {
             Player player = GetPlayer(PlayersData[i].User);
+            if (player == null)
+            {
+                continue;
+            }
             player.Enabled = true;
         }
 
