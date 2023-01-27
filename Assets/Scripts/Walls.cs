@@ -12,11 +12,20 @@ public class Walls : MonoBehaviour
     private void SetHealthComponent()
     {
         owningPlayer = Lobby.Instance.GetPlayer(Lobby.Instance.PlayersData[PlayerIndex].User);
+        if (owningPlayer == null)
+        {
+            return;
+        }
         health = owningPlayer.GetComponent<HealthComponent>();
     }
  
     private void OnCollisionEnter(Collision collision)
     {
+        if (owningPlayer == null)
+        {
+            return;
+        }
+
         if (collision.gameObject.GetComponent<Ball>())
         {
             health.DecrementHealth(owningPlayer);
